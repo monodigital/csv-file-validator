@@ -1,7 +1,7 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined'
         ? module.exports = factory(require('papaparse'), require('lodash/uniqBy'), require('lodash/isFunction'), require('famulus/isValuesUnique'))
-        : typeof define === 'function' && define.amd 
+        : typeof define === 'function' && define.amd
             ? define(['papaparse', 'lodash/uniqBy', 'lodash/isFunction', 'famulus/isValuesUnique'], factory)
             : (global.myBundle = factory(global.Papa,global._uniqBy,global._isFunction, global.isValuesUnique));
 }(this, (function (Papa, _uniqBy, _isFunction, isValuesUnique) {
@@ -13,12 +13,14 @@
     _isFunction = _isFunction && _isFunction.hasOwnProperty('default') ? _isFunction['default'] : _isFunction;
 
     /**
-     * @param {File} csvFile 
-     * @param {Object} config 
+     * @param {File} csvFile
+     * @param {Object} config
+     * @param {Object} configPapa
      */
-    function CSVFileValidator(csvFile, config) {
+    function CSVFileValidator(csvFile, config, configPapa = {}) {
         return new Promise(function(resolve, reject) {
             Papa.parse(csvFile, {
+                ...configPapa,
                 complete: function(results) {
                     resolve(_prepareDataAndValidateFile(results.data, config));
                 },
@@ -30,8 +32,8 @@
     }
 
     /**
-     * @param {Array} csvData 
-     * @param {Object} config 
+     * @param {Array} csvData
+     * @param {Object} config
      * @private
      */
     function _prepareDataAndValidateFile(csvData, config) {
@@ -39,8 +41,7 @@
             inValidMessages: [],
             data: []
         };
-
-        csvData.splice(0,1); // skip first row as a header
+        
         csvData.forEach(function(row, rowIndex) {
             const columnData = {};
             const headers = [];
@@ -54,6 +55,7 @@
             }
 
             if (row.length < headers.length) {
+                file.inValidMessages.push('The row ' + rowIndex + ' is invalid. Parameters missing.');
                 return;
             }
 
@@ -67,13 +69,13 @@
                 if (valueConfig.required && !columnValue.length) {
                     file.inValidMessages.push(
                         _isFunction(valueConfig.requiredError)
-                            ? valueConfig.requiredError(valueConfig.name, rowIndex + 2, columnIndex + 1)
+                            ? valueConfig.requiredError(valueConfig.name, rowIndex + 1, columnIndex + 1)
                             : valueConfig.requiredError
                     );
                 } else if (valueConfig.validate && !valueConfig.validate(columnValue)) {
                     file.inValidMessages.push(
                         _isFunction(valueConfig.validateError)
-                            ? valueConfig.validateError(valueConfig.name, rowIndex + 2, columnIndex + 1)
+                            ? valueConfig.validateError(valueConfig.name, rowIndex + 1, columnIndex + 1)
                             : valueConfig.validateError
                     );
                 }
@@ -83,7 +85,7 @@
                 }
 
                 if (valueConfig.isArray) {
-                    columnData[valueConfig.inputName] = columnValue.split(',').map(function(value) { 
+                    columnData[valueConfig.inputName] = columnValue.split(',').map(function(value) {
                         return value.trim();
                     });
                 } else {
@@ -100,9 +102,9 @@
     }
 
     /**
-     * @param {Object} file 
+     * @param {Object} file
      * @param {Object} config
-     * @private 
+     * @private
      */
     function _checkUniqueFields(file, config) {
         if (!file.data.length) {
