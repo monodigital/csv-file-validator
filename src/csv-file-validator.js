@@ -41,7 +41,7 @@
             inValidMessages: [],
             data: []
         };
-        
+
         csvData.forEach(function(row, rowIndex) {
             const columnData = {};
             const headers = [];
@@ -55,7 +55,7 @@
             }
 
             if (row.length < headers.length) {
-                file.inValidMessages.push('The row ' + rowIndex + ' is invalid. Parameters missing.');
+                file.inValidMessages.push('The row ' + (rowIndex + 1) + ' is invalid. Parameters missing. (attention may be given that the line is empty)');
                 return;
             }
 
