@@ -85,9 +85,13 @@
                 }
 
                 if (valueConfig.isArray) {
-                    columnData[valueConfig.inputName] = columnValue.split(',').map(function(value) {
-                        return value.trim();
-                    });
+                    if (!columnValue || columnValue.length === 0) {
+                        columnData[valueConfig.inputName] = [];
+                    } else {
+                        columnData[valueConfig.inputName] = columnValue.split(',').map(function(value) {
+                            return value.trim();
+                        });
+                    }
                 } else {
                     columnData[valueConfig.inputName] = columnValue;
                 }
