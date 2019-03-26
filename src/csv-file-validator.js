@@ -81,7 +81,7 @@
                 }
 
                 if (valueConfig.optional) {
-                    columnData[valueConfig.inputName] = columnValue;
+                    columnData[valueConfig.inputName] = columnValue.trim();
                 }
 
                 if (valueConfig.isArray) {
@@ -93,7 +93,7 @@
                         });
                     }
                 } else {
-                    columnData[valueConfig.inputName] = columnValue;
+                    columnData[valueConfig.inputName] = columnValue.trim();
                 }
             });
 
